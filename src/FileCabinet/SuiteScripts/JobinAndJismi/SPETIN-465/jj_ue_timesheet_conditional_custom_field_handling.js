@@ -28,11 +28,13 @@
  *
  * @version 1.0 SPETIN-465: 30-September-2025 : Initial build by JJ0402.
  ******************************************************************************************************************/
-define(["N/record", "N/search"], /**
+define(["N/record", "N/search"], 
+ /**
  * @param{record} record
  * @param{search} search
  */
   (record, search) => {
+    'use strict';
     const TM_FIELD = "custcol_jj_t_m";
     const FIXED_FIELD = "custcol_jj_fixed";
     const TM_VALUE = 100;
@@ -44,21 +46,14 @@ define(["N/record", "N/search"], /**
      * @param {string} scriptContext.type - Trigger type; use values from the context.UserEventType enum
      * @since 2015.2
      */
-
     const afterSubmit = (scriptContext) => {
       try {
         let newRecordId = scriptContext.newRecord.id;
-        const details = getTimebillDetails(newRecordId);
+        let details = getTimebillDetails(newRecordId);
         if (details) {
           let employeeSubsidiary = details.employeeSubsidiary;
           let projectSubsidiary = details.projectSubsidiary;
-          let employeeId = details.employeeId;
-          
-          log.debug('Employee ID', employeeId);
-          log.debug('Employee Subsidiary', employeeSubsidiary);
-          log.debug('Project Subsidiary', projectSubsidiary);
-
-         
+          let employeeId = details.employeeId;        
           if (employeeSubsidiary !== projectSubsidiary) {
             try {
               record.submitFields({
@@ -74,7 +69,7 @@ define(["N/record", "N/search"], /**
               log.error("SubmitFields Error", e.message);
             }
           } else {
-            const matchFound = searchInternalBilling(
+            let matchFound = searchInternalBilling(
               employeeId,
               employeeSubsidiary
             );
@@ -94,42 +89,36 @@ define(["N/record", "N/search"], /**
     };
     
     /**
- * Retrieves employee ID, employee subsidiary, and project subsidiary from a timebill record
- * using traditional checks for field safety.
- *
- * @param {string} newRecordId - The internal ID of the timebill record.
- * @returns {Object} An object containing employeeId, employeeSubsidiary, and projectSubsidiary.
- */
-function getTimebillDetails(newRecordId) {
-  const timebillDetails = search.lookupFields({
-    type: "timebill",
-    id: newRecordId,
-    columns: ['employee','employee.subsidiary','job.subsidiary']
-  });
-      let employeeId = timebillDetails.employee[0].value
-      log.debug("employeeId",employeeId);
-        log.debug("timebillDetails",timebillDetails);
-      let employeeSubsidiary = timebillDetails["employee.subsidiary"][0].value
-      let projectSubsidiary = timebillDetails["job.subsidiary"][0].value
-  return {
-          employeeId,
-          employeeSubsidiary,
-          projectSubsidiary};
-  
-}
-
-
-    /**
-     * Checks if an internal billing record exists for a given employee and subsidiary.
-     *
-     * @function
-     * @param {string} employeeId - The internal ID of the employee.
-     * @param {string} subsidiaryId - The internal ID of the subsidiary.
-     * @returns {boolean} True if a matching internal billing record is found, otherwise false.
-     */
-
+   * Retrieves employee ID, employee subsidiary, and project subsidiary from a timebill record
+   * using traditional checks for field safety.
+   *
+   * @param {string} newRecordId - The internal ID of the timebill record.
+   * @returns {Object} An object containing employeeId, employeeSubsidiary, and projectSubsidiary.
+   */
+    function getTimebillDetails(newRecordId) {
+      let timebillDetails = search.lookupFields({
+        type: "timebill",
+        id: newRecordId,
+        columns: ['employee','employee.subsidiary','job.subsidiary']
+      });
+          let employeeId = timebillDetails.employee[0].value
+          let employeeSubsidiary = timebillDetails["employee.subsidiary"][0].value
+          let projectSubsidiary = timebillDetails["job.subsidiary"][0].value
+      return {
+              employeeId,
+              employeeSubsidiary,
+              projectSubsidiary};
+    }
+   /**
+   * Checks if an internal billing record exists for a given employee and subsidiary.
+   *
+   * @function
+   * @param {string} employeeId - The internal ID of the employee.
+   * @param {string} subsidiaryId - The internal ID of the subsidiary.
+   * @returns {boolean} True if a matching internal billing record is found, otherwise false.
+   */
     function searchInternalBilling(employeeId, subsidiaryId) {
-      const ibSearch = search.create({
+      let ibSearch = search.create({
         type: "customrecord_jj_internal_billing",
         filters: [
           ["custrecord_jj_employee", "is", employeeId],
@@ -139,7 +128,7 @@ function getTimebillDetails(newRecordId) {
         columns: ["internalid"],
       });
 
-      const result = ibSearch.run().getRange({ start: 0, end: 1 });
+      let result = ibSearch.run().getRange({ start: 0, end: 1 });
       return result.length > 0;
     }
 
