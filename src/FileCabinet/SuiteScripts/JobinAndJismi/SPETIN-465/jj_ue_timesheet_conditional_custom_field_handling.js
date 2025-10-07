@@ -35,8 +35,6 @@ define(["N/record", "N/search"],
  */
   (record, search) => {
     'use strict';
-    const TM_FIELD = "custcol_jj_t_m";
-    const FIXED_FIELD = "custcol_jj_fixed";
     const TM_VALUE = 100;
     /**
      * Defines the function definition that is executed after record is submitted.
